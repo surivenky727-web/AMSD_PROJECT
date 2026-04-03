@@ -11,41 +11,45 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 dotenv.config();
 
-// ensure the URI is set early so connectDB can use it
+// Check Mongo URI
 if (!process.env.MONGO_URI) {
-  console.error("ERROR: MONGO_URI is not defined in .env");
+  console.error("ERROR: MONGO_URI is not defined");
   process.exit(1);
 }
 
+// Connect DB
 connectDB();
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+// Test route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+// Routes
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/doctor", doctorDashboardRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/admin", adminRoutes);
 
-// 404 and error handler
+// Error handlers
 app.use(notFound);
 app.use(errorHandler);
 
+// ✅ IMPORTANT (Render fix)
 const PORT = process.env.PORT || 4001;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// catch unhandled promise rejections and shut down gracefully
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // optionally attempt a graceful shutdown
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err.message);
 });
